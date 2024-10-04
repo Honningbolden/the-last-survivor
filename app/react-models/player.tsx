@@ -94,7 +94,7 @@ class Player {
     // Base speed values
     const groundSpeed = 25;
     const airSpeed = 8;
-    const targetSpeed = this.playerOnFloor ? groundSpeed : airSpeed;
+    const targetSpeed = deltaTime * (this.playerOnFloor ? groundSpeed : airSpeed);
 
     // Calculate directional velocities based on input
     const movementVector = new THREE.Vector3();
@@ -114,9 +114,9 @@ class Player {
 
     // Normalize the movement vector to ensure uniform speed and apply target speed
     if (movementVector.length() > 0) {
-      movementVector.normalize().multiplyScalar(targetSpeed * deltaTime);
-      this.playerVelocity.x = movementVector.x;
-      this.playerVelocity.z = movementVector.z;
+      movementVector.normalize().multiplyScalar(targetSpeed);
+      console.log("movementVector", movementVector.length());
+      this.playerVelocity.add(movementVector);
     }
 
     // Handle jumping separately

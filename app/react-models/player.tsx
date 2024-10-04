@@ -31,14 +31,10 @@ class Player {
   updatePlayer(deltaTime: number) {
     let damping = Math.exp(-4 * deltaTime) - 1;
 
+    // Apply gravity when not on the floor
     if (!this.playerOnFloor) {
       this.playerVelocity.y -= this.gravity * deltaTime;
       damping *= 0.1; // small air resistance to reduce rapid acceleration
-    }
-
-    // Limit the player's sliding speed to prevent flying off ledges
-    if (this.playerVelocity.length() > MAX_SLIDING_SPEED) {
-      this.playerVelocity.setLength(MAX_SLIDING_SPEED);
     }
 
     // Apply damping to slow down the player over time (simulates ground friction)
@@ -78,7 +74,13 @@ class Player {
         const slidingVector = result.normal.clone().multiplyScalar(-effectiveSlidingForce);
         this.playerVelocity.add(slidingVector);
 
+        // Apply additional gravity force for sliding
         this.playerVelocity.y -= this.gravity * 0.1;
+
+        // Limit the player's sliding speed to prevent flying off ledges
+        if (this.playerVelocity.length() > MAX_SLIDING_SPEED) {
+          this.playerVelocity.setLength(MAX_SLIDING_SPEED);
+        }
       }
 
       // Adjust plater position to prevent clipping into objects

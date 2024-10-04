@@ -99,7 +99,7 @@ class Player {
     if (keyStates['KeyD']) this.playerVelocity.add(this.getSideVector().multiplyScalar(speedDelta));
 
     if (this.playerOnFloor && keyStates['Space']) {
-      this.playerVelocity.y = 15;
+      this.playerVelocity.y = 10;
     }
   }
 

@@ -3,11 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Capsule, Octree } from "three-stdlib";
 
+// Utility Variables
 const STEPS_PER_FRAME = 5;
+
+// Environmental Forces
 const GRAVITY = 30;
 const MAX_SLIDING_FORCE = 10; // Maximum sliding force for steep slopes
 const MAX_SLIDING_SPEED = 5; // Limit the sliding speed to prevent uncontrollable flying
-const _ANGLE = 50;
+const MAX_SLOPE_ANGLE = 50;
+
+// Base speed values
+const JUMP_FORCE = 8;
+const GROUND_SPEED = 30;
+const AIR_SPEED = 8;
 
 class Player {
   camera: THREE.Camera;
@@ -59,14 +67,14 @@ class Player {
       const slopeAngle = Math.acos(result.normal.dot(new THREE.Vector3(0, 1, 0))) * (180 / Math.PI);
 
       // If the slope angle is below or equal to the angle limit (50 degrees), consider the player on the floor
-      if (slopeAngle <= _ANGLE) {
+      if (slopeAngle <= MAX_SLOPE_ANGLE) {
         this.playerOnFloor = result.normal.y > 0;
       }
 
       // If the player is not on the floor apply sliding mechanics
       if (!this.playerOnFloor) {
         // Calculate sliding force proportional to the steepness of the slope
-        const slidingForce = MAX_SLIDING_FORCE * (slopeAngle - _ANGLE) / (90 - _ANGLE);
+        const slidingForce = MAX_SLIDING_FORCE * (slopeAngle - MAX_SLOPE_ANGLE) / (90 - MAX_SLOPE_ANGLE);
         // Limit sliding force to a reasonable value
         const effectiveSlidingForce = Math.min(slidingForce, MAX_SLIDING_FORCE);
 
@@ -91,10 +99,7 @@ class Player {
   }
 
   handleMovement(deltaTime: number, keyStates: { [key: string]: boolean }) {
-    // Base speed values
-    const groundSpeed = 25;
-    const airSpeed = 8;
-    const targetSpeed = deltaTime * (this.playerOnFloor ? groundSpeed : airSpeed);
+    const targetSpeed = deltaTime * (this.playerOnFloor ? GROUND_SPEED : AIR_SPEED);
 
     // Calculate directional velocities based on input
     const movementVector = new THREE.Vector3();
@@ -121,7 +126,7 @@ class Player {
 
     // Handle jumping separately
     if (this.playerOnFloor && keyStates['Space']) {
-      this.playerVelocity.y = 15; // Allow jumping only when on the floor
+      this.playerVelocity.y = JUMP_FORCE; // Allow jumping only when on the floor
     }
   }
 
@@ -158,8 +163,8 @@ export default function PlayerComponent({ worldOctree }: { worldOctree: Octree }
     const onMouseDown = () => document.body.requestPointerLock();
     const onMouseMove = (event: MouseEvent) => {
       if (document.pointerLockElement === document.body) {
-        camera.rotation.y -= event.movementX / _ANGLE;
-        camera.rotation.x -= event.movementY / 500;
+        camera.rotation.y -= event.movementX / 250;
+        camera.rotation.x -= event.movementY / 250;
       }
     };
 

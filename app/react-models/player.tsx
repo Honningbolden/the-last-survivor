@@ -7,7 +7,7 @@ const STEPS_PER_FRAME = 5;
 const GRAVITY = 30;
 const MAX_SLIDING_FORCE = 10; // Maximum sliding force for steep slopes
 const MAX_SLIDING_SPEED = 5; // Limit the sliding speed to prevent uncontrollable flying
-const MAX_SLOPE_ANGLE = 50;
+const _ANGLE = 50;
 
 class Player {
   camera: THREE.Camera;
@@ -59,14 +59,14 @@ class Player {
       const slopeAngle = Math.acos(result.normal.dot(new THREE.Vector3(0, 1, 0))) * (180 / Math.PI);
 
       // If the slope angle is below or equal to the angle limit (50 degrees), consider the player on the floor
-      if (slopeAngle <= MAX_SLOPE_ANGLE) {
+      if (slopeAngle <= _ANGLE) {
         this.playerOnFloor = result.normal.y > 0;
       }
 
       // If the player is not on the floor apply sliding mechanics
       if (!this.playerOnFloor) {
         // Calculate sliding force proportional to the steepness of the slope
-        const slidingForce = MAX_SLIDING_FORCE * (slopeAngle - MAX_SLOPE_ANGLE) / (90 - MAX_SLOPE_ANGLE);
+        const slidingForce = MAX_SLIDING_FORCE * (slopeAngle - _ANGLE) / (90 - _ANGLE);
         // Limit sliding force to a reasonable value
         const effectiveSlidingForce = Math.min(slidingForce, MAX_SLIDING_FORCE);
 
@@ -91,15 +91,37 @@ class Player {
   }
 
   handleMovement(deltaTime: number, keyStates: { [key: string]: boolean }) {
-    const speedDelta = deltaTime * (this.playerOnFloor ? 25 : 8);
+    // Base speed values
+    const groundSpeed = 25;
+    const airSpeed = 8;
+    const targetSpeed = this.playerOnFloor ? groundSpeed : airSpeed;
 
-    if (keyStates['KeyW']) this.playerVelocity.add(this.getForwardVector().multiplyScalar(speedDelta));
-    if (keyStates['KeyS']) this.playerVelocity.add(this.getForwardVector().multiplyScalar(-speedDelta));
-    if (keyStates['KeyA']) this.playerVelocity.add(this.getSideVector().multiplyScalar(-speedDelta));
-    if (keyStates['KeyD']) this.playerVelocity.add(this.getSideVector().multiplyScalar(speedDelta));
+    // Calculate directional velocities based on input
+    const movementVector = new THREE.Vector3();
 
+    if (keyStates['KeyW']) {
+      movementVector.add(this.getForwardVector());
+    }
+    if (keyStates['KeyS']) {
+      movementVector.add(this.getForwardVector().multiplyScalar(-1));
+    }
+    if (keyStates['KeyA']) {
+      movementVector.add(this.getSideVector().multiplyScalar(-1));
+    }
+    if (keyStates['KeyD']) {
+      movementVector.add(this.getSideVector());
+    }
+
+    // Normalize the movement vector to ensure uniform speed and apply target speed
+    if (movementVector.length() > 0) {
+      movementVector.normalize().multiplyScalar(targetSpeed * deltaTime);
+      this.playerVelocity.x = movementVector.x;
+      this.playerVelocity.z = movementVector.z;
+    }
+
+    // Handle jumping separately
     if (this.playerOnFloor && keyStates['Space']) {
-      this.playerVelocity.y = 10;
+      this.playerVelocity.y = 15; // Allow jumping only when on the floor
     }
   }
 
@@ -136,7 +158,7 @@ export default function PlayerComponent({ worldOctree }: { worldOctree: Octree }
     const onMouseDown = () => document.body.requestPointerLock();
     const onMouseMove = (event: MouseEvent) => {
       if (document.pointerLockElement === document.body) {
-        camera.rotation.y -= event.movementX / MAX_SLOPE_ANGLE;
+        camera.rotation.y -= event.movementX / _ANGLE;
         camera.rotation.x -= event.movementY / 500;
       }
     };

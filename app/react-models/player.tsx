@@ -1,22 +1,21 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { Capsule } from "three-stdlib";
-import { Octree } from "three-stdlib";
+import { Capsule, Octree } from "three-stdlib";
 
 const STEPS_PER_FRAME = 5;
 const GRAVITY = 30;
 
 class Player {
   camera: THREE.Camera;
-  worldOctree: any;
-  playerCollider: any;
+  worldOctree: Octree;
+  playerCollider: Capsule;
   playerVelocity: THREE.Vector3;
   playerDirection: THREE.Vector3;
   playerOnFloor: boolean;
   gravity: number;
 
-  constructor(camera: THREE.Camera, worldOctree: any, playerCollider: any) {
+  constructor(camera: THREE.Camera, worldOctree: Octree, playerCollider: Capsule) {
     this.camera = camera;
     this.worldOctree = worldOctree;
     this.playerCollider = playerCollider;
@@ -26,7 +25,7 @@ class Player {
     this.gravity = GRAVITY;
   }
 
-  updatePlayer(deltaTime) {
+  updatePlayer(deltaTime: number) {
     let damping = Math.exp(-4 * deltaTime) - 1;
 
     if (!this.playerOnFloor) {
@@ -49,9 +48,19 @@ class Player {
     this.playerOnFloor = false;
 
     if (result) {
-      this.playerOnFloor = result.normal.y > 0;
+      // Calculate the slope angle using the normal
+      const slopeAngle = Math.acos(result.normal.dot(new THREE.Vector3(0, 1, 0))) * (180 / Math.PI);
+
+      // If the slope is less than or equal to 50 degrees, the player is on the floor
+      if (slopeAngle <= 50) {
+        this.playerOnFloor = result.normal.y > 0;
+      }
+
+      // If the player is not on the floor apply sliding mechanics
       if (!this.playerOnFloor) {
+        // Add sliding force
         this.playerVelocity.addScaledVector(result.normal, -result.normal.dot(this.playerVelocity));
+        this.playerVelocity.y -= this.gravity * 0.1; // Apply additional gravity force for sliding
       }
       if (result.depth >= 1e-10) {
         this.playerCollider.translate(result.normal.multiplyScalar(result.depth));
@@ -59,7 +68,7 @@ class Player {
     }
   }
 
-  handleMovement(deltaTime, keyStates) {
+  handleMovement(deltaTime: number, keyStates: { [key: string]: boolean }) {
     const speedDelta = deltaTime * (this.playerOnFloor ? 25 : 8);
     if (keyStates['KeyW']) this.playerVelocity.add(this.getForwardVector().multiplyScalar(speedDelta));
     if (keyStates['KeyS']) this.playerVelocity.add(this.getForwardVector().multiplyScalar(-speedDelta));
@@ -87,7 +96,7 @@ class Player {
   }
 }
 
-export default function PlayerComponent({ worldOctree }: { worldOctree: any }) {
+export default function PlayerComponent({ worldOctree }: { worldOctree: Octree }) {
   const { camera } = useThree();
   const playerCollider = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
   const [keyStates, setKeyStates] = useState({});

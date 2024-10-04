@@ -1,15 +1,15 @@
 "use client"
 
-import { Canvas, useThree } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber";
+import { useRef } from "react";
 import * as THREE from 'three';
-import { useEffect, useRef, useState } from "react";
 
-import { Capsule, Octree } from "three-stdlib";
-import PlayerComponent from "../models/player";
-import Ground from "../models/ground";
+import { Octree } from "three-stdlib";
+import PlayerComponent from "../react-models/player";
+import TestLevel from "../react-models/test-level";
 
 export default function ThreeCanvas() {
-  const worldOctree = useRef(new Octree());
+  const worldOctree = useRef<Octree>(new Octree());
 
   return (
     <div className='flex justify-center items-center h-screen'>
@@ -26,8 +26,8 @@ export default function ThreeCanvas() {
         camera={{ fov: 70, near: 0.1, far: 1000, position: [0, 2, 5] }}>
         <ambientLight intensity={1} />
         <directionalLight castShadow position={[10, 10, 5]} intensity={1.5} />
-        <Ground worldOctree={worldOctree.current}/>
-        <PlayerComponent worldOctree={worldOctree.current}/>
+        <TestLevel worldOctree={worldOctree.current} />
+        <PlayerComponent worldOctree={worldOctree.current} />
       </Canvas>
     </div>
   )

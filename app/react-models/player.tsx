@@ -120,7 +120,6 @@ class Player {
     // Normalize the movement vector to ensure uniform speed and apply target speed
     if (movementVector.length() > 0) {
       movementVector.normalize().multiplyScalar(targetSpeed);
-      console.log("movementVector", movementVector.length());
       this.playerVelocity.add(movementVector);
     }
 

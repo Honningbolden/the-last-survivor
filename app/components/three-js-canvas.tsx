@@ -23,7 +23,7 @@ export default function ThreeCanvas() {
           gl.shadowMap.type = THREE.VSMShadowMap; // Use VSM shadow maps
           gl.toneMapping = THREE.ACESFilmicToneMapping; // Apply ACES Filmic tone mapping
         }}
-        camera={{ fov: 70, near: 0.1, far: 1000, position: [0, 2, 5] }}>
+        camera={{ fov: 60, near: 0.1, far: 1000, position: [0, 2, 5] }}>
         <ambientLight intensity={1} />
         <directionalLight castShadow position={[10, 10, 5]} intensity={1.5} />
         <TestLevel worldOctree={worldOctree.current} />

@@ -48,19 +48,9 @@ class Player {
     this.playerOnFloor = false;
 
     if (result) {
-      // Calculate the slope angle using the normal
-      const slopeAngle = Math.acos(result.normal.dot(new THREE.Vector3(0, 1, 0))) * (180 / Math.PI);
-
-      // If the slope is less than or equal to 50 degrees, the player is on the floor
-      if (slopeAngle <= 50) {
-        this.playerOnFloor = result.normal.y > 0;
-      }
-
-      // If the player is not on the floor apply sliding mechanics
+      this.playerOnFloor = result.normal.y > 0;
       if (!this.playerOnFloor) {
-        // Add sliding force
         this.playerVelocity.addScaledVector(result.normal, -result.normal.dot(this.playerVelocity));
-        this.playerVelocity.y -= this.gravity * 0.1; // Apply additional gravity force for sliding
       }
       if (result.depth >= 1e-10) {
         this.playerCollider.translate(result.normal.multiplyScalar(result.depth));

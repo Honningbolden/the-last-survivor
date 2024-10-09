@@ -4,52 +4,31 @@ import * as THREE from 'three';
 import { GLTFLoader, Octree } from "three-stdlib";
 
 export default function BlockoutTerrain({ worldOctree }: { worldOctree: Octree }) {
-  const modelRef = useRef<THREE.Group | null>(null);
+  const modelRef = useRef<THREE.Group>(null);
 
   // Load GLB model
   const gltf = useLoader(GLTFLoader, '/models/blockout/blockout_terrain.glb');
 
   useEffect(() => {
-    if (gltf && gltf.scene) {
-      // Set model reference to the loaded glTF scene
-      modelRef.current = gltf.scene;
-
+    if (modelRef.current && gltf.scene) {
       // Add the level geometry to the Octree for collision detection
-      worldOctree.fromGraphNode(gltf.scene);
+      worldOctree.fromGraphNode(modelRef.current);
 
-      gltf.scene.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          mesh.material = (mesh.material as THREE.Material).clone();
-
-          if (Array.isArray(mesh.material)) {
-            mesh.material = mesh.material.map(() => new THREE.MeshStandardMaterial({
-              color: 0xffffff,
-              metalness: 0.5,
-              roughness: 0.5,
-            }));
-          } else {
-            mesh.material = new THREE.MeshStandardMaterial({
-              color: 0xffffff,
-              metalness: 0.5,
-              roughness: 0.5,
-            });
-          }
-
-          // Set shadow properties
-          mesh.castShadow = true;
-          mesh.receiveShadow = true;
+      // Traverse through the model and apply a material to each mesh
+      gltf.scene.traverse((node) => {
+        if (node instanceof THREE.Mesh) {
+          node.material = new THREE.MeshStandardMaterial({
+            color: 0xaa5533, // Example color for mountains
+            roughness: 0.9,
+            metalness: 0.1,
+          });
         }
       });
-
-      // Optionally log or debug the loaded model
-      console.log('Model loaded and added to Octree:', gltf.scene);
     }
   }, [worldOctree, gltf]);
 
-
   return (
-    <group ref={modelRef} position={[0, 0, 0]} receiveShadow castShadow>
+    <group ref={modelRef} position={[0, 0, 0]} receiveShadow>
       <primitive object={gltf.scene} />
     </group>
   )

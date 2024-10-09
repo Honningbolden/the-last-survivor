@@ -10,6 +10,7 @@ import BlockoutTerrain from "../react-models/blockout/blockout-terrain";
 import { Environment } from "@react-three/drei";
 import { Stars } from "@react-three/drei";
 import { AccumulativeShadows, RandomizedLight } from "@react-three/drei";
+import BlockoutMountains from "../react-models/blockout/blockout-mountains";
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
@@ -68,6 +69,7 @@ export default function ThreeCanvas() {
         </AccumulativeShadows>
 
         <BlockoutTerrain worldOctree={worldOctree.current} />
+        <BlockoutMountains worldOctree={worldOctree.current} />
         <PlayerComponent worldOctree={worldOctree.current} />
       </Canvas>
     </div>

@@ -1,35 +1,52 @@
 import { useLoader } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useRef, useEffect, memo } from "react";
 import * as THREE from 'three';
-import { GLTFLoader, Octree } from "three-stdlib";
+import { GLTFLoader } from "three-stdlib";
+import { Octree } from "three-stdlib";
+import { SimplexNoise } from "three-stdlib";
 
-export default function BlockoutTerrain({ worldOctree }: { worldOctree: Octree }) {
+const noise = new SimplexNoise();
+
+const BlockoutTerrain = memo(({ worldOctree }: { worldOctree: Octree }) => {
   const modelRef = useRef<THREE.Group>(null);
 
-  // Load GLB model
-  const gltf = useLoader(GLTFLoader, '/models/blockout/blockout_terrain.glb');
+  // Load GLB model and extract nodes
+  const { nodes } = useLoader(GLTFLoader, '/models/blockout/blockout_terrain.glb');
 
   useEffect(() => {
-    if (modelRef.current && gltf.scene) {
+    if (modelRef.current) {
       // Add the level geometry to the Octree for collision detection
       worldOctree.fromGraphNode(modelRef.current);
-
-      // Traverse through the model and apply a material to each mesh
-      gltf.scene.traverse((node) => {
-        if (node instanceof THREE.Mesh) {
-          node.material = new THREE.MeshStandardMaterial({
-            color: 0xaa5533, // Example color for mountains
-            roughness: 0.9,
-            metalness: 0.1,
-          });
-        }
-      });
+      console.log('Model loaded and added to Octree:', modelRef.current);
     }
-  }, [worldOctree, gltf]);
+  }, [worldOctree, nodes]);
 
   return (
-    <group ref={modelRef} position={[0, 0, 0]} receiveShadow>
-      <primitive object={gltf.scene} />
+    <group ref={modelRef} position={[0, 0, 0]} receiveShadow castShadow>
+      {/* Apply material to individual nodes */}
+      {Object.keys(nodes).map((key, index) => {
+        const node = nodes[key];
+        if (node instanceof THREE.Mesh) {
+          return (
+            <mesh
+              key={index}
+              geometry={node.geometry}
+              position={node.position}
+              rotation={node.rotation}
+              scale={node.scale}
+              castShadow
+              receiveShadow
+            >
+              <meshStandardMaterial color="#888888" roughness={0.9} metalness={0.2} flatShading />
+            </mesh>
+          );
+        }
+        return null;
+      })}
     </group>
-  )
-}
+  );
+})
+
+BlockoutTerrain.displayName = 'BlockoutTerrain';
+
+export default BlockoutTerrain;

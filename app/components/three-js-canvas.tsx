@@ -1,16 +1,13 @@
 "use client"
 
+import { AccumulativeShadows, AdaptiveDpr, BakeShadows, Environment, Preload, RandomizedLight, SoftShadows, Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useRef } from "react";
+import { Suspense, useRef } from "react";
 import * as THREE from 'three';
-
 import { Octree } from "three-stdlib";
-import PlayerComponent from "../react-models/player";
-import BlockoutTerrain from "../react-models/blockout/blockout-terrain";
-import { Environment } from "@react-three/drei";
-import { Stars } from "@react-three/drei";
-import { AccumulativeShadows, RandomizedLight } from "@react-three/drei";
 import BlockoutMountains from "../react-models/blockout/blockout-mountains";
+import BlockoutTerrain from "../react-models/blockout/blockout-terrain";
+import PlayerComponent from "../react-models/player";
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
@@ -20,57 +17,79 @@ export default function ThreeCanvas() {
       <Canvas className='h-2xl w-2xl'
         shadows
         dpr={window.devicePixelRatio}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, scene }) => {
           gl.setSize(window.innerWidth, window.innerHeight); // Set renderer size
           gl.shadowMap.enabled = true; // Enable shadow maps
           gl.shadowMap.type = THREE.VSMShadowMap; // Use VSM shadow maps
           gl.toneMapping = THREE.ACESFilmicToneMapping; // Apply ACES Filmic tone mapping
+
+          // Adding fog to the scene
+          scene.fog = new THREE.FogExp2(0x060812, 0.01); // Exponential fog for smoother results
         }}
-        camera={{ fov: 60, near: 0.1, far: 1000, position: [0, 2, 5] }}>
+        camera={{ fov: 50, near: 0.1, far: 150, position: [0, 2, 5] }}>
 
-        <Stars radius={40} depth={200} count={8000} factor={6} saturation={.5} fade speed={1} />
+        <AdaptiveDpr pixelated />
 
-        {/* Lighting */}
-        <hemisphereLight
-          color={new THREE.Color(0x88ccff)} // Light blue to simulate daylight
-          groundColor={new THREE.Color(0x444422)} // Soft brown to simulate ground bounce light
-          intensity={0.4}
-        />
-        <directionalLight
-          castShadow
-          position={[50, 10, 0]}
-          intensity={2}
-          color={0xfff2e6}
-          shadow-mapSize={[4096, 4096]}
-          shadow-camera-left={-30}
-          shadow-camera-right={30}
-          shadow-camera-top={30}
-          shadow-camera-bottom={-30}
-        />
-        <AccumulativeShadows
-          temporal // Enables temporal accumulative effect for softer shadows
-          frames={100} // Number of frames to accumulate, higher gives softer shadows
-          alphaTest={0.85}
-          scale={10}
-          position={[0, -0.5, 0]}
-        >
+        <Environment background near={100} far={10000} resolution={2048} frames={Infinity} environmentIntensity={0} backgroundIntensity={0.3}>
+          <Stars radius={80} depth={100} count={8000} factor={4} saturation={0.5} fade speed={1} />
+        </Environment>
+
+        <AccumulativeShadows temporal frames={100} scale={5} position={[0, -0.5, 0]}>
           <RandomizedLight
-            amount={8}
-            radius={5}
-            intensity={1}
-            ambient={1}
+            castShadow
+            amount={12}
+            frames={100}
             position={[5, 5, -10]}
             bias={0}
-            mapSize={1024}
-            size={50}
-            near={0.1}
-            far={100}
+            radius={12}
+            intensity={0.8}
+            ambient={0.6}
           />
         </AccumulativeShadows>
 
-        <BlockoutTerrain worldOctree={worldOctree.current} />
-        <BlockoutMountains worldOctree={worldOctree.current} />
+        {/* Lighting */}
+        <hemisphereLight
+          castShadow
+          color={0x397eed} // Light blue to simulate daylight
+          groundColor={0xf5c04e} // Soft brown to simulate ground bounce light
+          intensity={0.3}
+        />
+        {/* Directional Sunlight - Epic lighting coming from right angle */}
+        <directionalLight
+          castShadow
+          position={[100, 50, -20]} // Adjust to have the light at an angle above the scene
+          intensity={3}
+          color={0xcf8744}
+          shadow-mapSize={[2048, 2048]} // Increase shadow map resolution for better quality
+          shadow-camera-left={-80} // Increase boundary to cover a larger area
+          shadow-camera-right={180}
+          shadow-camera-top={220}
+          shadow-camera-bottom={-16}
+          shadow-camera-near={0.5} // Set near clipping plane for shadows
+          shadow-camera-far={200} // Set far clipping plane for shadows
+        />
+        {/* Secondary Light */}
+        <directionalLight
+          castShadow
+          position={[-15, 100, -50]} // Adjust to have the light at an angle above the scene
+          intensity={0.5}
+          // color={0xcf8744}
+          color={0xe09e34}
+        />
+        <SoftShadows
+          size={15}
+          samples={10}
+          focus={5}
+        />
+
+
+        <Suspense fallback={null}>
+          <BlockoutTerrain worldOctree={worldOctree.current} />
+          <BlockoutMountains worldOctree={worldOctree.current} />
+          <BakeShadows />
+        </Suspense>
         <PlayerComponent worldOctree={worldOctree.current} />
+        <Preload all />
       </Canvas>
     </div>
   )

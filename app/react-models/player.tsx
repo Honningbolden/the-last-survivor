@@ -145,40 +145,42 @@ class Player {
   }
 }
 
-export default function PlayerComponent({ worldOctree }: { worldOctree: Octree }) {
+export default function PlayerComponent({ worldOctree, playerCollider }: { worldOctree: Octree, playerCollider: React.RefObject<Capsule> }) {
   const { camera } = useThree();
-  const playerCollider = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
+  // const playerColliderRef = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
   const [keyStates, setKeyStates] = useState({});
   const player = useRef<Player>();
   const clock = useRef(new THREE.Clock());
 
   useEffect(() => {
     // Initialize the Player object
-    player.current = new Player(camera, worldOctree, playerCollider.current);
-    camera.rotation.order = 'YXZ';
+    if (playerCollider.current) {
+      player.current = new Player(camera, worldOctree, playerCollider.current);
+      camera.rotation.order = 'YXZ';
 
-    const onKeyDown = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: true }));
-    const onKeyUp = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: false }));
-    const onMouseDown = () => document.body.requestPointerLock();
-    const onMouseMove = (event: MouseEvent) => {
-      if (document.pointerLockElement === document.body) {
-        camera.rotation.y -= event.movementX / 250;
-        camera.rotation.x -= event.movementY / 250;
-      }
-    };
+      const onKeyDown = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: true }));
+      const onKeyUp = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: false }));
+      const onMouseDown = () => document.body.requestPointerLock();
+      const onMouseMove = (event: MouseEvent) => {
+        if (document.pointerLockElement === document.body) {
+          camera.rotation.y -= event.movementX / 250;
+          camera.rotation.x -= event.movementY / 250;
+        }
+      };
 
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("keyup", onKeyUp);
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("keydown", onKeyDown);
+      document.addEventListener("keyup", onKeyUp);
+      document.addEventListener("mousedown", onMouseDown);
+      document.addEventListener("mousemove", onMouseMove);
 
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("keyup", onKeyUp);
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mousemove", onMouseMove);
-    };
-  }, [camera]);
+      return () => {
+        document.removeEventListener("keydown", onKeyDown);
+        document.removeEventListener("keyup", onKeyUp);
+        document.removeEventListener("mousedown", onMouseDown);
+        document.removeEventListener("mousemove", onMouseMove);
+      };
+    }
+  }, [camera, playerCollider, worldOctree]);
 
   useFrame(() => {
     const deltaTime = Math.min(0.05, clock.current.getDelta()) / STEPS_PER_FRAME;

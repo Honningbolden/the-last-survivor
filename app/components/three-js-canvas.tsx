@@ -4,13 +4,37 @@ import { AccumulativeShadows, AdaptiveDpr, BakeShadows, Environment, Preload, Ra
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useRef } from "react";
 import * as THREE from 'three';
-import { Octree } from "three-stdlib";
+import { Capsule, Octree } from "three-stdlib";
 import BlockoutMountains from "../react-models/blockout/blockout-mountains";
 import BlockoutTerrain from "../react-models/blockout/blockout-terrain";
 import PlayerComponent from "../react-models/player";
+import TriggerZone from "../react-models/audio-trigger";
+import { useEffect, useState } from "react";
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
+  const playerCollider = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
+
+  // State to track whether the user has interacted with the page
+  const [isInteractionAllowed, setIsInteractionAllowed] = useState(false);
+  const [hasRendered, setHasRendered] = useState(false);
+
+  // Allow audio to play after user interaction
+  useEffect(() => {
+    const enableInteraction = () => {
+      setIsInteractionAllowed(true);
+      window.removeEventListener("click", enableInteraction);
+    };
+    
+    if (!isInteractionAllowed) {
+      window.addEventListener("click", enableInteraction);
+    }
+
+    if (!hasRendered) {
+      setHasRendered(true);
+    }
+  }, [hasRendered, isInteractionAllowed]);
+
 
   return (
     <div className='flex justify-center items-center h-screen'>
@@ -87,10 +111,73 @@ export default function ThreeCanvas() {
           <BlockoutTerrain worldOctree={worldOctree.current} />
           <BlockoutMountains worldOctree={worldOctree.current} />
           <BakeShadows />
+        {triggerZonesConfig.map((config, index) => (
+          <TriggerZone
+            key={`audio_trigger_${index}`}
+            position={config.position}
+            radius={config.radius}
+            playerCollider={playerCollider}
+            onTrigger={() => {
+              // Play the corresponding audio file
+              const audio = new Audio(config.audioFile);
+              audio.play();
+            }}
+          />
+        ))}
         </Suspense>
-        <PlayerComponent worldOctree={worldOctree.current} />
+        <PlayerComponent worldOctree={worldOctree.current} playerCollider={playerCollider} />
+
+
         <Preload all />
       </Canvas>
     </div>
   )
 }
+
+const triggerZonesConfig: { position: [number, number, number]; radius: number; audioFile: string; }[] = [
+  {
+    position: [-1, 1.3, 0.5],
+    radius: 4,
+    audioFile: '/Voiceover/Jordan/Inside Infirmary (pt1)/ElevenLabs_2024-10-09T11_47_43_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+  },
+  {
+    position: [-3, 2, -16],
+    radius: 8,
+    audioFile: '/Voiceover/Jordan/Outside infirmary (pt2)/ElevenLabs_2024-10-09T11_50_51_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+  },
+  {
+    position: [-10, 4, -30],
+    radius: 6,
+    audioFile: '/Voiceover/Jordan/Toolbox (pt3)/ElevenLabs_2024-10-09T11_54_07_Jordan - Warm Narrator_pvc_s50_sb50_se0_b_m2.mp3',
+  },
+  {
+    position: [-26, 4.6, -44],
+    radius: 10,
+    audioFile: '/Voiceover/Jordan/Mining tracks (pt4)/ElevenLabs_2024-10-09T11_55_21_Jordan - Warm Narrator_pvc_s35_sb40_se0_b_m2.mp3',
+  },
+  {
+    position: [-40, 9, -89],
+    radius: 16,
+    audioFile: '/Voiceover/Jordan/Three Skeletons (pt5)/ElevenLabs_2024-10-09T11_56_32_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+  },
+  {
+    position: [-19, 108, -9],
+    radius: 12,
+    audioFile: '/Voiceover/Jordan/Industrial Parking (pt6)/ElevenLabs_2024-10-09T12_03_38_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+  },
+  {
+    position: [40, 8, -55],
+    radius: 32,
+    audioFile: '/Voiceover/Jordan/Bloody skeleton (pt7)/ElevenLabs_2024-10-09T12_00_00_Jordan - Warm Narrator_pvc_s50_sb70_se10_b_m2.mp3',
+  },
+  {
+    position: [60, 18, -95],
+    radius: 32,
+    audioFile: '/Voiceover/Jordan/City View (pt8)/ElevenLabs_2024-10-10T10_20_24_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+  },
+  {
+    position: [77, 23, -130],
+    radius: 32,
+    audioFile: '/Voiceover/Jordan/Revelation (pt9)/ElevenLabs_2024-10-09T12_02_12_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+  },
+];

@@ -2,16 +2,15 @@
 
 import { AccumulativeShadows, AdaptiveDpr, BakeShadows, Environment, Preload, RandomizedLight, SoftShadows, Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from 'three';
 import { Capsule, Octree } from "three-stdlib";
+import AssetCollection from "../react-models/asset-collection";
+import TriggerZone from "../react-models/audio-trigger";
 import BlockoutMountains from "../react-models/blockout/blockout-mountains";
 import BlockoutTerrain from "../react-models/blockout/blockout-terrain";
 import PlayerComponent from "../react-models/player";
-import TriggerZone from "../react-models/audio-trigger";
-import { useEffect, useState } from "react";
-import ScatteredRocks, { TestRocks } from "../react-models/scattered-rocks";
-import AssetCollection from "../react-models/asset-collection";
+import ScatteredRocks from "../react-models/scattered-rocks";
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());

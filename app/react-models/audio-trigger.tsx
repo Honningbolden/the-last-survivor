@@ -34,7 +34,7 @@ export default function TriggerZone({ position, radius, playerCollider, onTrigge
     }
   })
 
-  const material = new THREE.MeshBasicMaterial({ opacity: 0.2, transparent: true, color: 0x1246FC });
+  const material = new THREE.MeshBasicMaterial({ opacity: 0.1, transparent: true, color: 0xffffff });
 
   return (
     <Sphere ref={modelRef} material={material} position={position} args={[radius, 8, 8]} />

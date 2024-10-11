@@ -7,15 +7,15 @@ import { Capsule, Octree } from "three-stdlib";
 const STEPS_PER_FRAME = 5;
 
 // Environmental Forces
-const GRAVITY = 30;
+const GRAVITY = 5;
 const MAX_SLIDING_FORCE = 10; // Maximum sliding force for steep slopes
 const MAX_SLIDING_SPEED = 5; // Limit the sliding speed to prevent uncontrollable flying
 const MAX_SLOPE_ANGLE = 50;
 
 // Base speed values
-const JUMP_FORCE = 8;
-const GROUND_SPEED = 30;
-const AIR_SPEED = 8;
+const JUMP_FORCE = 2;
+const GROUND_SPEED = 4;
+const AIR_SPEED = 2;
 
 class Player {
   camera: THREE.Camera;

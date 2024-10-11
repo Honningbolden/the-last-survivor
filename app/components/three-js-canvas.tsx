@@ -10,6 +10,8 @@ import BlockoutTerrain from "../react-models/blockout/blockout-terrain";
 import PlayerComponent from "../react-models/player";
 import TriggerZone from "../react-models/audio-trigger";
 import { useEffect, useState } from "react";
+import ScatteredRocks, { TestRocks } from "../react-models/scattered-rocks";
+import AssetCollection from "../react-models/asset-collection";
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
@@ -25,7 +27,7 @@ export default function ThreeCanvas() {
       setIsInteractionAllowed(true);
       window.removeEventListener("click", enableInteraction);
     };
-    
+
     if (!isInteractionAllowed) {
       window.addEventListener("click", enableInteraction);
     }
@@ -48,9 +50,9 @@ export default function ThreeCanvas() {
           gl.toneMapping = THREE.ACESFilmicToneMapping; // Apply ACES Filmic tone mapping
 
           // Adding fog to the scene
-          scene.fog = new THREE.FogExp2(0x060812, 0.01); // Exponential fog for smoother results
+          scene.fog = new THREE.FogExp2(0x060812, 0.02); // Exponential fog for smoother results
         }}
-        camera={{ fov: 50, near: 0.1, far: 150, position: [0, 2, 5] }}>
+        camera={{ fov: 50, near: 0.1, far: 500, position: [0, 2, 5] }}>
 
         <AdaptiveDpr pixelated />
 
@@ -110,22 +112,25 @@ export default function ThreeCanvas() {
         <Suspense fallback={null}>
           <BlockoutTerrain worldOctree={worldOctree.current} />
           <BlockoutMountains worldOctree={worldOctree.current} />
+          <AssetCollection worldOctree={worldOctree.current} />
+          <ScatteredRocks />
+          {/* <TestRocks/> */}
           <BakeShadows />
-        {triggerZonesConfig.map((config, index) => (
-          <TriggerZone
-            key={`audio_trigger_${index}`}
-            position={config.position}
-            radius={config.radius}
-            playerCollider={playerCollider}
-            onTrigger={() => {
-              // Play the corresponding audio file
-              const audio = new Audio(config.audioFile);
-              audio.play();
-            }}
-          />
-        ))}
+          <PlayerComponent worldOctree={worldOctree.current} playerCollider={playerCollider} />
+          {triggerZonesConfig.map((config, index) => (
+            <TriggerZone
+              key={`audio_trigger_${index}`}
+              position={config.position}
+              radius={config.radius}
+              playerCollider={playerCollider}
+              onTrigger={() => {
+                // Play the corresponding audio file
+                const audio = new Audio(config.audioFile);
+                audio.play();
+              }}
+            />
+          ))}
         </Suspense>
-        <PlayerComponent worldOctree={worldOctree.current} playerCollider={playerCollider} />
 
 
         <Preload all />
@@ -137,7 +142,7 @@ export default function ThreeCanvas() {
 const triggerZonesConfig: { position: [number, number, number]; radius: number; audioFile: string; }[] = [
   {
     position: [-1, 1.3, 0.5],
-    radius: 4,
+    radius: 1,
     audioFile: '/Voiceover/Jordan/Inside Infirmary (pt1)/ElevenLabs_2024-10-09T11_47_43_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {

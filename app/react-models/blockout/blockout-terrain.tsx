@@ -3,9 +3,6 @@ import { useRef, useEffect, memo } from "react";
 import * as THREE from 'three';
 import { GLTFLoader } from "three-stdlib";
 import { Octree } from "three-stdlib";
-import { SimplexNoise } from "three-stdlib";
-
-const noise = new SimplexNoise();
 
 const BlockoutTerrain = memo(({ worldOctree }: { worldOctree: Octree }) => {
   const modelRef = useRef<THREE.Group>(null);

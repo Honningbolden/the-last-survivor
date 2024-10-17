@@ -1,10 +1,16 @@
-import { useEffect, useMemo, useRef } from "react"
-import { useLoader } from "@react-three/fiber";
-import { GLTFLoader } from "three-stdlib";
-import * as THREE from 'three';
 import { Instance, Instances } from "@react-three/drei";
+import { useLoader } from "@react-three/fiber";
+import { useMemo } from "react";
+import * as THREE from 'three';
+import { GLTFLoader } from "three-stdlib";
 
-export default function ScatteredRocks({ instanceCount = 1000 }) {
+interface InstanceProps {
+  position: THREE.Vector3;
+  rotation: THREE.Euler;
+  scale: THREE.Vector3;
+}
+
+export default function ScatteredRocks() {
   const gltf = useLoader(GLTFLoader, '/models/Assets/Low Poly Rock Instances.glb');
 
   // Extract the nodes from the GLTF
@@ -12,7 +18,7 @@ export default function ScatteredRocks({ instanceCount = 1000 }) {
 
   // Prepare positions, rotations, and scales from the nodes
   const instanceProps = useMemo(() => {
-    const props = [];
+    const props: InstanceProps[] = [];
     if (!nodes) return props;
 
     // Traverse through nodes to extract transform properties
@@ -47,7 +53,7 @@ export default function ScatteredRocks({ instanceCount = 1000 }) {
           key={`instance_${i}`}
           position={props.position}
           rotation={props.rotation}
-          scale={Math.min(0.5, Math.random()/Math.sqrt(2))}
+          scale={Math.min(0.5, Math.random() / Math.sqrt(2))}
         />
       ))}
     </Instances>

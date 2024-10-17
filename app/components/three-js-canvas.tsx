@@ -27,7 +27,7 @@ export default function ThreeCanvas() {
       window.removeEventListener("click", enableInteraction);
     };
 
-    if (!isInteractionAllowed) {
+    if (!isInteractionAllowed && typeof window !== "undefined") {
       window.addEventListener("click", enableInteraction);
     }
 
@@ -41,9 +41,11 @@ export default function ThreeCanvas() {
     <div className='flex justify-center items-center h-screen'>
       <Canvas className='h-2xl w-2xl'
         shadows
-        dpr={window.devicePixelRatio}
+        dpr={typeof window !== 'undefined' ? window.devicePixelRatio : 1}
         onCreated={({ gl, scene }) => {
-          gl.setSize(window.innerWidth, window.innerHeight); // Set renderer size
+          if (typeof window !== "undefined") {
+            gl.setSize(window.innerWidth, window.innerHeight); // Set renderer size
+          }
           gl.shadowMap.enabled = true; // Enable shadow maps
           gl.shadowMap.type = THREE.VSMShadowMap; // Use VSM shadow maps
           gl.toneMapping = THREE.ACESFilmicToneMapping; // Apply ACES Filmic tone mapping

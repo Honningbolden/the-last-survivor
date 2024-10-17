@@ -24,7 +24,7 @@ export default function ThreeCanvas() {
   useEffect(() => {
     const enableInteraction = () => {
       setIsInteractionAllowed(true);
-      window.removeEventListener("click", enableInteraction);
+      if (typeof window !== "undefined") window.removeEventListener("click", enableInteraction);
     };
 
     if (!isInteractionAllowed && typeof window !== "undefined") {

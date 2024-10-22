@@ -1,7 +1,17 @@
+
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Capsule, Octree } from "three-stdlib";
+import { useDirection } from "../components/get-direction";
+import { useSpring, motion } from "framer-motion";
+
+// Hand recognition packages
+import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
+import '@tensorflow/tfjs-core';
+// Register WebGL backend.
+import '@tensorflow/tfjs-backend-webgl';
+import '@mediapipe/hands';
 
 // Utility Variables
 const STEPS_PER_FRAME = 5;
@@ -25,6 +35,8 @@ class Player {
   playerDirection: THREE.Vector3;
   playerOnFloor: boolean;
   gravity: number;
+  detector: handPoseDetection.HandDetector | null;
+  // video: HTMLVideoElement;
 
   constructor(camera: THREE.Camera, worldOctree: Octree, playerCollider: Capsule) {
     this.camera = camera;
@@ -34,6 +46,7 @@ class Player {
     this.playerDirection = new THREE.Vector3();
     this.playerOnFloor = false;
     this.gravity = GRAVITY;
+    this.detector = null;
   }
 
   updatePlayer(deltaTime: number) {
@@ -98,7 +111,8 @@ class Player {
     }
   }
 
-  handleMovement(deltaTime: number, keyStates: { [key: string]: boolean }) {
+  handleMovement(deltaTime: number, keyStates: { [key: string]: boolean }, direction: THREE.Vector3 | null, setCameraRotation: (rotation: { x: number, y: number }) => void
+  ) {
     const targetSpeed = deltaTime * (this.playerOnFloor ? GROUND_SPEED : AIR_SPEED);
 
     // Calculate directional velocities based on input
@@ -127,6 +141,13 @@ class Player {
     if (this.playerOnFloor && keyStates['Space']) {
       this.playerVelocity.y = JUMP_FORCE; // Allow jumping only when on the floor
     }
+
+    // Use the direction from the hand to control the camera rotation
+    if (direction) {
+      const rotationY = Math.atan2(direction.x, direction.z);
+      const rotationX = -Math.asin(direction.y);
+      setCameraRotation({ x: this.camera.rotation.x + rotationX, y: this.camera.rotation.y + rotationY });
+    }
   }
 
   getForwardVector() {
@@ -151,6 +172,11 @@ export default function PlayerComponent({ worldOctree, playerCollider }: { world
   const [keyStates, setKeyStates] = useState({});
   const player = useRef<Player>();
   const clock = useRef(new THREE.Clock());
+  const { direction } = useDirection();
+
+  // Create spring values for camera rotation
+  const springRotationX = useSpring(0, { stiffness: 10, damping: 40 });
+  const springRotationY = useSpring(0, { stiffness: 10, damping: 40 });
 
   useEffect(() => {
     // Initialize the Player object
@@ -171,13 +197,13 @@ export default function PlayerComponent({ worldOctree, playerCollider }: { world
       document.addEventListener("keydown", onKeyDown);
       document.addEventListener("keyup", onKeyUp);
       document.addEventListener("mousedown", onMouseDown);
-      document.addEventListener("mousemove", onMouseMove);
+      // document.addEventListener("mousemove", onMouseMove);
 
       return () => {
         document.removeEventListener("keydown", onKeyDown);
         document.removeEventListener("keyup", onKeyUp);
         document.removeEventListener("mousedown", onMouseDown);
-        document.removeEventListener("mousemove", onMouseMove);
+        // document.removeEventListener("mousemove", onMouseMove);
       };
     }
   }, [camera, playerCollider, worldOctree]);
@@ -189,10 +215,17 @@ export default function PlayerComponent({ worldOctree, playerCollider }: { world
       if (player.current) {
         // Update player and handle movement each substep
         player.current.updatePlayer(deltaTime);
-        player.current.handleMovement(deltaTime, keyStates);
+        player.current.handleMovement(deltaTime, keyStates, direction, ({ x, y }) => {
+          springRotationX.set(x);
+          springRotationY.set(y);
+        });
         // Here you could also call other update functions (e.g., updateSpheres, teleportPlayerIfOob, etc.)
       }
     }
+
+    // Apply the spring rotation to the camera
+    camera.rotation.x = springRotationX.get();
+    camera.rotation.y = springRotationY.get();
   });
 
   return null;

@@ -6,7 +6,7 @@ import '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
 import '@mediapipe/hands';
 import * as THREE from 'three'
-import { useDirection } from "./get-direction";
+import { useDirection, useDistance } from "./get-direction";
 
 export default function VideoElement({ videoRef }: { videoRef: React.RefObject<HTMLVideoElement> }) {
   const model = handPoseDetection.SupportedModels.MediaPipeHands;
@@ -17,7 +17,9 @@ export default function VideoElement({ videoRef }: { videoRef: React.RefObject<H
   const detectorRef = useRef<handPoseDetection.HandDetector | null>(null);
   const estimationConfig = { flipHorizontal: true };
   const { setDirection } = useDirection();
+  const { setDistance } = useDistance();
   const lastDirectionRef = useRef<THREE.Vector3 | null>(null);
+  const lastDistanceRef = useRef<number | null>(null);
 
   useEffect(() => {
     const initializeDetector = async () => {
@@ -51,16 +53,24 @@ export default function VideoElement({ videoRef }: { videoRef: React.RefObject<H
 
           if (hands.length > 0) {
             const rightHand = hands.find(hand => hand.handedness === "Right");
+            const leftHand = hands.find(hand => hand.handedness === "Left");
+
+            if (leftHand) {
+              console.log("Left hand");
+              const indexThumbDistance = findDistance({ hand: leftHand });
+              setDistance(indexThumbDistance);
+              lastDistanceRef.current = indexThumbDistance;
+              console.log(indexThumbDistance)
+            } else if (lastDistanceRef.current) {
+              setDistance(lastDistanceRef.current);
+            }
 
             if (rightHand) {
               console.log("Right hand")
-              const indexFingerDirection = findAngle({ hand: hands[0] }); // If right hand, find angle
+              const indexFingerDirection = findAngle({ hand: rightHand }); // If right hand, find angle
               setDirection(indexFingerDirection); // Set the direction in the context
               lastDirectionRef.current = indexFingerDirection; // Update last known direction
-              return;
-            }
-
-            if (lastDirectionRef.current) {
+            } else if (lastDirectionRef.current) {
               setDirection(lastDirectionRef.current);
             }
           }
@@ -76,7 +86,7 @@ export default function VideoElement({ videoRef }: { videoRef: React.RefObject<H
     return () => clearInterval(interval); // Clean up the interval on component unmount
   }, [videoRef, estimationConfig]);
 
-  return <video ref={videoRef} style={{ position: 'absolute', top: '10px', right: '10px', width: '200px', height: '150px', zIndex: 10 }} />
+  return <video ref={videoRef} style={{ position: 'absolute', bottom: '10px', left: '10px', width: '400px', height: '300px', opacity: 0.5, zIndex: 10, transform: 'scaleX(-1)' }} />
 }
 
 function findAngle({ hand }: { hand: handPoseDetection.Hand }) {

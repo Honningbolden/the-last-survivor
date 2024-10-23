@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Capsule, Octree } from "three-stdlib";
-import { useDirection } from "../components/get-direction";
+import { useDirection, useDistance } from "../components/get-direction";
 import { useSpring, motion } from "framer-motion";
 
 // Hand recognition packages
@@ -24,7 +24,7 @@ const MAX_SLOPE_ANGLE = 50;
 
 // Base speed values
 const JUMP_FORCE = 2;
-const GROUND_SPEED = 4;
+const GROUND_SPEED = 8;
 const AIR_SPEED = 2;
 
 class Player {
@@ -111,24 +111,16 @@ class Player {
     }
   }
 
-  handleMovement(deltaTime: number, keyStates: { [key: string]: boolean }, direction: THREE.Vector3 | null, setCameraRotation: (rotation: { x: number, y: number }) => void
+  handleMovement(deltaTime: number, direction: THREE.Vector3 | null, distance: number | null, setCameraRotation: (rotation: { x: number, y: number }) => void
   ) {
-    const targetSpeed = deltaTime * (this.playerOnFloor ? GROUND_SPEED : AIR_SPEED);
+    const speedMultiplier = distance !== null ? (distance - 0.05) / (0.15 - 0.05) : 1; // Normalize distance to a range of 0 to 1
+    const targetSpeed = deltaTime * (this.playerOnFloor ? GROUND_SPEED : AIR_SPEED) * speedMultiplier;
 
     // Calculate directional velocities based on input
     const movementVector = new THREE.Vector3();
 
-    if (keyStates['KeyW']) {
+    if (distance) {
       movementVector.add(this.getForwardVector());
-    }
-    if (keyStates['KeyS']) {
-      movementVector.add(this.getForwardVector().multiplyScalar(-1));
-    }
-    if (keyStates['KeyA']) {
-      movementVector.add(this.getSideVector().multiplyScalar(-1));
-    }
-    if (keyStates['KeyD']) {
-      movementVector.add(this.getSideVector());
     }
 
     // Normalize the movement vector to ensure uniform speed and apply target speed
@@ -137,10 +129,10 @@ class Player {
       this.playerVelocity.add(movementVector);
     }
 
-    // Handle jumping separately
-    if (this.playerOnFloor && keyStates['Space']) {
-      this.playerVelocity.y = JUMP_FORCE; // Allow jumping only when on the floor
-    }
+    // // Handle jumping separately
+    // if (this.playerOnFloor && keyStates['Space']) {
+    //   this.playerVelocity.y = JUMP_FORCE; // Allow jumping only when on the floor
+    // }
 
     // Use the direction from the hand to control the camera rotation
     if (direction) {
@@ -169,10 +161,11 @@ class Player {
 export default function PlayerComponent({ worldOctree, playerCollider }: { worldOctree: Octree, playerCollider: React.RefObject<Capsule> }) {
   const { camera } = useThree();
   // const playerColliderRef = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
-  const [keyStates, setKeyStates] = useState({});
+  // const [keyStates, setKeyStates] = useState({});
   const player = useRef<Player>();
   const clock = useRef(new THREE.Clock());
   const { direction } = useDirection();
+  const { distance } = useDistance();
 
   // Create spring values for camera rotation
   const springRotationX = useSpring(0, { stiffness: 10, damping: 40 });
@@ -184,27 +177,19 @@ export default function PlayerComponent({ worldOctree, playerCollider }: { world
       player.current = new Player(camera, worldOctree, playerCollider.current);
       camera.rotation.order = 'YXZ';
 
-      const onKeyDown = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: true }));
-      const onKeyUp = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: false }));
-      const onMouseDown = () => document.body.requestPointerLock();
-      const onMouseMove = (event: MouseEvent) => {
-        if (document.pointerLockElement === document.body) {
-          camera.rotation.y -= event.movementX / 250;
-          camera.rotation.x -= event.movementY / 250;
-        }
-      };
+      // const onKeyDown = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: true }));
+      // const onKeyUp = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: false }));
+      // const onMouseDown = () => document.body.requestPointerLock();
 
-      document.addEventListener("keydown", onKeyDown);
-      document.addEventListener("keyup", onKeyUp);
-      document.addEventListener("mousedown", onMouseDown);
-      // document.addEventListener("mousemove", onMouseMove);
+      // document.addEventListener("keydown", onKeyDown);
+      // document.addEventListener("keyup", onKeyUp);
+      // document.addEventListener("mousedown", onMouseDown);
 
-      return () => {
-        document.removeEventListener("keydown", onKeyDown);
-        document.removeEventListener("keyup", onKeyUp);
-        document.removeEventListener("mousedown", onMouseDown);
-        // document.removeEventListener("mousemove", onMouseMove);
-      };
+      // return () => {
+      //   document.removeEventListener("keydown", onKeyDown);
+      //   document.removeEventListener("keyup", onKeyUp);
+      //   document.removeEventListener("mousedown", onMouseDown);
+      // };
     }
   }, [camera, playerCollider, worldOctree]);
 
@@ -215,7 +200,7 @@ export default function PlayerComponent({ worldOctree, playerCollider }: { world
       if (player.current) {
         // Update player and handle movement each substep
         player.current.updatePlayer(deltaTime);
-        player.current.handleMovement(deltaTime, keyStates, direction, ({ x, y }) => {
+        player.current.handleMovement(deltaTime, direction, distance, ({ x, y }) => {
           springRotationX.set(x);
           springRotationY.set(y);
         });

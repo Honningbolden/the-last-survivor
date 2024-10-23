@@ -23,7 +23,6 @@ const MAX_SLIDING_SPEED = 5; // Limit the sliding speed to prevent uncontrollabl
 const MAX_SLOPE_ANGLE = 50;
 
 // Base speed values
-const JUMP_FORCE = 2;
 const GROUND_SPEED = 8;
 const AIR_SPEED = 2;
 

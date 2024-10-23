@@ -12,6 +12,7 @@ export default function Home() {
       <>
         <ThreeCanvas />
         <VideoElement videoRef={videoRef} />
+        <div>hello hello</div>
       </>
     </DirectionProvider>
   );

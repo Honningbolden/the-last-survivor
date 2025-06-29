@@ -16,6 +16,8 @@ import LoadingScreen from './loading-screen';
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
   const playerCollider = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
+  const audioBuffers = useRef<HTMLAudioElement[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0); // track which audio is next
 
   // State to track whether the user has interacted with the page
   const [isInteractionAllowed, setIsInteractionAllowed] = useState(false);
@@ -36,6 +38,18 @@ export default function ThreeCanvas() {
       setHasRendered(true);
     }
   }, [hasRendered, isInteractionAllowed]);
+
+  // Preload all voiceover clips muted to unlock playback later
+  useEffect(() => {
+    audioBuffers.current = triggerZonesConfig.map((cfg) => {
+      const clip = new Audio(cfg.audioFile);
+      clip.muted = true;
+      clip.preload = 'auto';
+      clip.play().catch(() => {});
+      clip.onended = () => setCurrentIndex((i) => i + 1);
+      return clip;
+    });
+  }, []);
 
   return (
     <div className='flex justify-center items-center h-screen'>
@@ -102,19 +116,31 @@ export default function ThreeCanvas() {
             {/* <TestRocks/> */}
             <BakeShadows />
             <PlayerComponent worldOctree={worldOctree.current} playerCollider={playerCollider} />
-            {triggerZonesConfig.map((config, index) => (
-              <TriggerZone
-                key={`audio_trigger_${index}`}
-                position={config.position}
-                radius={config.radius}
-                playerCollider={playerCollider}
-                onTrigger={() => {
-                  // Play the corresponding audio file
-                  const audio = new Audio(config.audioFile);
-                  audio.play();
-                }}
-              />
-            ))}
+            {triggerZonesConfig.map((config, index) => {
+              // only show current (blue) and next (red) spheres
+              if (index < currentIndex || index > currentIndex + 1) return null;
+              const isCurrent = index === currentIndex;
+              const color = isCurrent ? '#0000ff' : '#ff0000';
+              const opacity = 0.5;
+              const enabled = isCurrent;
+              return (
+                <TriggerZone
+                  key={`audio_trigger_${index}`}
+                  position={config.position}
+                  radius={config.radius}
+                  playerCollider={playerCollider}
+                  onTrigger={() => {
+                    const clip = audioBuffers.current[index];
+                    clip.muted = false;
+                    clip.currentTime = 0;
+                    clip.play();
+                  }}
+                  enabled={enabled}
+                  color={color}
+                  opacity={opacity}
+                />
+              );
+            })}
           </Suspense>
         </Suspense>
 
@@ -126,7 +152,7 @@ export default function ThreeCanvas() {
 
 const triggerZonesConfig: { position: [number, number, number]; radius: number; audioFile: string }[] = [
   {
-    position: [-1, 1.3, 0.5],
+    position: [0, 1.3, 0.5],
     radius: 1,
     audioFile: '/Voiceover/Jordan/Inside Infirmary (pt1)/ElevenLabs_2024-10-09T11_47_43_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },

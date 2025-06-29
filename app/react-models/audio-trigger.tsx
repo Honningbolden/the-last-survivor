@@ -1,23 +1,43 @@
-import { Capsule } from "three-stdlib";
+import { Capsule } from 'three-stdlib';
 import * as THREE from 'three';
-import { Sphere } from "@react-three/drei";
-import { useEffect, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { Sphere } from '@react-three/drei';
+import { useEffect, useRef, useMemo } from 'react';
+import { useFrame } from '@react-three/fiber';
 
-export default function TriggerZone({ position, radius, playerCollider, onTrigger }: {
-  position: [number, number, number],
-  radius: number,
-  playerCollider: React.MutableRefObject<Capsule>,
-  onTrigger: () => void,
+export default function TriggerZone({
+  position,
+  radius,
+  playerCollider,
+  onTrigger,
+  enabled = false,
+  color = '#ffffff',
+  opacity = 0.1,
+}: {
+  position: [number, number, number];
+  radius: number;
+  playerCollider: React.MutableRefObject<Capsule>;
+  onTrigger: () => void;
+  enabled?: boolean;
+  color?: string;
+  opacity?: number;
 }) {
   const modelRef = useRef<THREE.Mesh>(null);
   const hasTriggered = useRef(false);
 
+  // If player spawns inside an enabled zone, fire immediately
   useEffect(() => {
-    console.log("Audio trigger mounted")
-  },[])
+    if (enabled && !hasTriggered.current && playerCollider.current) {
+      const playerPos = playerCollider.current.start.clone().add(playerCollider.current.end).multiplyScalar(0.5);
+      const triggerPos = new THREE.Vector3(...position);
+      if (playerPos.distanceTo(triggerPos) <= radius) {
+        hasTriggered.current = true;
+        onTrigger();
+      }
+    }
+  }, [enabled, position, radius, onTrigger, playerCollider]);
 
   useFrame(() => {
+    if (!enabled || hasTriggered.current) return;
     if (modelRef.current && playerCollider.current) {
       // Calculate the distance between the player collider's endpoint and the trigger zone
       const playerPosition = playerCollider.current.start.clone().add(playerCollider.current.end).multiplyScalar(0.5);
@@ -32,11 +52,9 @@ export default function TriggerZone({ position, radius, playerCollider, onTrigge
         onTrigger();
       }
     }
-  })
+  });
 
-  const material = new THREE.MeshBasicMaterial({ opacity: 0.1, transparent: true, color: 0xffffff });
+  const material = useMemo(() => new THREE.MeshBasicMaterial({ color: new THREE.Color(color), transparent: true, opacity }), [color, opacity]);
 
-  return (
-    <Sphere ref={modelRef} material={material} position={position} args={[radius, 8, 8]} />
-  )
+  return <Sphere ref={modelRef} material={material} position={position} args={[radius, 16, 16]} />;
 }

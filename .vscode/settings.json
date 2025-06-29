@@ -1,6 +1,5 @@
 {
-  "cSpell.words": [
-    "GLTF",
-    "Octree"
-  ]
+  "cSpell.words": ["GLTF", "Octree"],
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { AccumulativeShadows, AdaptiveDpr, BakeShadows, Environment, Preload, RandomizedLight, Stars } from '@react-three/drei';
+import { AccumulativeShadows, AdaptiveDpr, BakeShadows, ContactShadows, Environment, Preload, RandomizedLight, Stars } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -47,10 +47,8 @@ export default function ThreeCanvas() {
             gl.setSize(window.innerWidth, window.innerHeight);
           }
           gl.shadowMap.enabled = true;
-          gl.shadowMap.type = THREE.VSMShadowMap;
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
           gl.toneMapping = THREE.ACESFilmicToneMapping;
-
-          // Adding fog to the scene
           scene.fog = new THREE.FogExp2(0x060812, 0.02);
         }}
         camera={{ fov: 50, near: 0.1, far: 500, position: [0, 2, 5] }}>
@@ -60,7 +58,6 @@ export default function ThreeCanvas() {
           <Stars radius={80} depth={100} count={8000} factor={4} saturation={0.5} fade speed={1} />
         </Environment>
 
-        {/* Lower temporal frames for faster shadows */}
         <AccumulativeShadows temporal frames={30} scale={5} position={[0, -0.5, 0]}>
           <RandomizedLight
             castShadow
@@ -74,20 +71,17 @@ export default function ThreeCanvas() {
           />
         </AccumulativeShadows>
 
+        <ContactShadows position={[0, -0.5, 0]} width={10} height={10} resolution={256} blur={2} far={1} opacity={0.5} />
+
         {/* Lighting */}
-        <hemisphereLight
-          castShadow
-          color={0x397eed} // Light blue to simulate daylight
-          groundColor={0xf5c04e} // Soft brown to simulate ground bounce light
-          intensity={0.3}
-        />
+        <hemisphereLight castShadow color={0x397eed} groundColor={0xf5c04e} intensity={0.3} />
         {/* Directional Sunlight - Epic lighting coming from right angle */}
         <directionalLight
           castShadow
-          position={[100, 50, -20]} // Adjust to have the light at an angle above the scene
+          position={[100, 50, -20]}
           intensity={3}
           color={0xcf8744}
-          shadow-mapSize={[1024, 1024]} // Reduce shadow resolution
+          shadow-mapSize={[1024, 1024]}
           shadow-camera-left={-80}
           shadow-camera-right={180}
           shadow-camera-top={220}
@@ -96,14 +90,7 @@ export default function ThreeCanvas() {
           shadow-camera-far={200}
         />
         {/* Secondary Light */}
-        <directionalLight
-          castShadow
-          position={[-15, 100, -50]}
-          intensity={0.5}
-          // color={0xcf8744}
-          color={0xe09e34}
-        />
-        {/* SoftShadows disabled for performance */}
+        <directionalLight castShadow position={[-15, 100, -50]} intensity={0.5} color={0xe09e34} />
 
         <Suspense fallback={null}>
           <BlockoutTerrain worldOctree={worldOctree.current} />

@@ -1,16 +1,16 @@
-"use client"
+'use client';
 
-import { AccumulativeShadows, AdaptiveDpr, BakeShadows, Environment, Preload, RandomizedLight, SoftShadows, Stars } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { AccumulativeShadows, AdaptiveDpr, BakeShadows, Environment, Preload, RandomizedLight, Stars } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Capsule, Octree } from "three-stdlib";
-import AssetCollection from "../react-models/asset-collection";
-import TriggerZone from "../react-models/audio-trigger";
-import BlockoutMountains from "../react-models/blockout/blockout-mountains";
-import BlockoutTerrain from "../react-models/blockout/blockout-terrain";
-import PlayerComponent from "../react-models/player";
-import ScatteredRocks from "../react-models/scattered-rocks";
+import { Capsule, Octree } from 'three-stdlib';
+import AssetCollection from '../react-models/asset-collection';
+import TriggerZone from '../react-models/audio-trigger';
+import BlockoutMountains from '../react-models/blockout/blockout-mountains';
+import BlockoutTerrain from '../react-models/blockout/blockout-terrain';
+import PlayerComponent from '../react-models/player';
+import ScatteredRocks from '../react-models/scattered-rocks';
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
@@ -24,11 +24,11 @@ export default function ThreeCanvas() {
   useEffect(() => {
     const enableInteraction = () => {
       setIsInteractionAllowed(true);
-      if (typeof window !== "undefined") window.removeEventListener("click", enableInteraction);
+      if (typeof window !== 'undefined') window.removeEventListener('click', enableInteraction);
     };
 
-    if (!isInteractionAllowed && typeof window !== "undefined") {
-      window.addEventListener("click", enableInteraction);
+    if (!isInteractionAllowed && typeof window !== 'undefined') {
+      window.addEventListener('click', enableInteraction);
     }
 
     if (!hasRendered) {
@@ -36,35 +36,35 @@ export default function ThreeCanvas() {
     }
   }, [hasRendered, isInteractionAllowed]);
 
-
   return (
     <div className='flex justify-center items-center h-screen'>
-      <Canvas className='h-2xl w-2xl'
+      <Canvas
+        className='h-2xl w-2xl'
         shadows
-        dpr={typeof window !== 'undefined' ? window.devicePixelRatio : 1}
+        dpr={[1, Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5)]} // Cap DPR at 1.5
         onCreated={({ gl, scene }) => {
-          if (typeof window !== "undefined") {
-            gl.setSize(window.innerWidth, window.innerHeight); // Set renderer size
+          if (typeof window !== 'undefined') {
+            gl.setSize(window.innerWidth, window.innerHeight);
           }
-          gl.shadowMap.enabled = true; // Enable shadow maps
-          gl.shadowMap.type = THREE.VSMShadowMap; // Use VSM shadow maps
-          gl.toneMapping = THREE.ACESFilmicToneMapping; // Apply ACES Filmic tone mapping
+          gl.shadowMap.enabled = true;
+          gl.shadowMap.type = THREE.VSMShadowMap;
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
 
           // Adding fog to the scene
-          scene.fog = new THREE.FogExp2(0x060812, 0.02); // Exponential fog for smoother results
+          scene.fog = new THREE.FogExp2(0x060812, 0.02);
         }}
         camera={{ fov: 50, near: 0.1, far: 500, position: [0, 2, 5] }}>
-
         <AdaptiveDpr pixelated />
 
-        <Environment background near={100} far={10000} resolution={2048} frames={Infinity} environmentIntensity={0} backgroundIntensity={0.3}>
+        <Environment background near={100} far={10000} resolution={1024} frames={Infinity} environmentIntensity={0} backgroundIntensity={0.3}>
           <Stars radius={80} depth={100} count={8000} factor={4} saturation={0.5} fade speed={1} />
         </Environment>
 
-        <AccumulativeShadows temporal frames={100} scale={5} position={[0, -0.5, 0]}>
+        {/* Lower temporal frames for faster shadows */}
+        <AccumulativeShadows temporal frames={30} scale={5} position={[0, -0.5, 0]}>
           <RandomizedLight
             castShadow
-            amount={12}
+            amount={8} // Reduce light samples
             frames={100}
             position={[5, 5, -10]}
             bias={0}
@@ -87,28 +87,23 @@ export default function ThreeCanvas() {
           position={[100, 50, -20]} // Adjust to have the light at an angle above the scene
           intensity={3}
           color={0xcf8744}
-          shadow-mapSize={[2048, 2048]} // Increase shadow map resolution for better quality
-          shadow-camera-left={-80} // Increase boundary to cover a larger area
+          shadow-mapSize={[1024, 1024]} // Reduce shadow resolution
+          shadow-camera-left={-80}
           shadow-camera-right={180}
           shadow-camera-top={220}
           shadow-camera-bottom={-16}
-          shadow-camera-near={0.5} // Set near clipping plane for shadows
-          shadow-camera-far={200} // Set far clipping plane for shadows
+          shadow-camera-near={0.5}
+          shadow-camera-far={200}
         />
         {/* Secondary Light */}
         <directionalLight
           castShadow
-          position={[-15, 100, -50]} // Adjust to have the light at an angle above the scene
+          position={[-15, 100, -50]}
           intensity={0.5}
           // color={0xcf8744}
           color={0xe09e34}
         />
-        <SoftShadows
-          size={15}
-          samples={10}
-          focus={5}
-        />
-
+        {/* SoftShadows disabled for performance */}
 
         <Suspense fallback={null}>
           <BlockoutTerrain worldOctree={worldOctree.current} />
@@ -133,14 +128,13 @@ export default function ThreeCanvas() {
           ))}
         </Suspense>
 
-
         <Preload all />
       </Canvas>
     </div>
-  )
+  );
 }
 
-const triggerZonesConfig: { position: [number, number, number]; radius: number; audioFile: string; }[] = [
+const triggerZonesConfig: { position: [number, number, number]; radius: number; audioFile: string }[] = [
   {
     position: [-1, 1.3, 0.5],
     radius: 1,

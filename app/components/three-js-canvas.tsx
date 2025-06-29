@@ -11,6 +11,7 @@ import BlockoutMountains from '../react-models/blockout/blockout-mountains';
 import BlockoutTerrain from '../react-models/blockout/blockout-terrain';
 import PlayerComponent from '../react-models/player';
 import ScatteredRocks from '../react-models/scattered-rocks';
+import LoadingScreen from './loading-screen';
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
@@ -93,26 +94,28 @@ export default function ThreeCanvas() {
         <directionalLight castShadow position={[-15, 100, -50]} intensity={0.5} color={0xe09e34} />
 
         <Suspense fallback={null}>
-          <BlockoutTerrain worldOctree={worldOctree.current} />
-          <BlockoutMountains worldOctree={worldOctree.current} />
-          <AssetCollection worldOctree={worldOctree.current} />
-          <ScatteredRocks />
-          {/* <TestRocks/> */}
-          <BakeShadows />
-          <PlayerComponent worldOctree={worldOctree.current} playerCollider={playerCollider} />
-          {triggerZonesConfig.map((config, index) => (
-            <TriggerZone
-              key={`audio_trigger_${index}`}
-              position={config.position}
-              radius={config.radius}
-              playerCollider={playerCollider}
-              onTrigger={() => {
-                // Play the corresponding audio file
-                const audio = new Audio(config.audioFile);
-                audio.play();
-              }}
-            />
-          ))}
+          <Suspense fallback={<LoadingScreen />}>
+            <BlockoutTerrain worldOctree={worldOctree.current} />
+            <BlockoutMountains worldOctree={worldOctree.current} />
+            <AssetCollection worldOctree={worldOctree.current} />
+            <ScatteredRocks />
+            {/* <TestRocks/> */}
+            <BakeShadows />
+            <PlayerComponent worldOctree={worldOctree.current} playerCollider={playerCollider} />
+            {triggerZonesConfig.map((config, index) => (
+              <TriggerZone
+                key={`audio_trigger_${index}`}
+                position={config.position}
+                radius={config.radius}
+                playerCollider={playerCollider}
+                onTrigger={() => {
+                  // Play the corresponding audio file
+                  const audio = new Audio(config.audioFile);
+                  audio.play();
+                }}
+              />
+            ))}
+          </Suspense>
         </Suspense>
 
         <Preload all />

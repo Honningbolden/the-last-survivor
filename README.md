@@ -16,12 +16,12 @@ The story is told in passages: pieces of audio that plays as you progress. Audio
 
 ###### Controls
 You'll control yourself in first-person, but you have to options:
-1) Using your hands and webcam
+**1) Using your hands and webcam**
     * Use your **right index finger** to control where you look.
     * Use the distance between your **left index finger and thumb** to control how fast the player moves forward (you'll always move in the direction you're looking).
         * When you're fingers are touching, you will not move.
         * When you're fingers are spaced far apart you move as full speed.
-2) Keyboard and mouse
+**2) Keyboard and mouse**
     * W-A-S-D to move the player
     * Cursor controls orientation
 

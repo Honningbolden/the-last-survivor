@@ -1,24 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function SplashScreen({ onStart }: { onStart: (useWebcam: boolean) => void }) {
   const [overlay, setOverlay] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const toggleOverlay = () => {
     setOverlay(!overlay);
     console.log('test');
   };
 
+  useEffect(() => {
+    if (typeof window !== undefined) {
+      setIsDesktop(window.matchMedia('(pointer:fine)').matches);
+    }
+  }, []);
+
   return (
     <div className={'flex flex-col h-screen justify-center items-center bg-white text-black'}>
       <h1 className={'text-8xl font-extrabold mb-2'}>The Last Survivor</h1>
       <h2 className={'text-xl font-normal'}>An Interactive Storybook Experience</h2>
+
       <button
-        className='px-6 py-3 font-semibold text-base bg-green-300 rounded-lg my-12'
+        className={[
+          'px-6 py-3 font-semibold text-base rounded-lg my-12',
+          isDesktop ? 'bg-green-300' : 'bg-gray-300',
+        ].join(' ')}
+        disabled={!isDesktop}
         onClick={toggleOverlay}>
         Start Experience 🚀
       </button>
+      {!isDesktop && (
+        <p className='mb-12 italic'>
+          This website is desktop-only. Please visit on your computer 🫶{' '}
+        </p>
+      )}
       {overlay && (
         <div
           className={
@@ -34,7 +51,7 @@ export default function SplashScreen({ onStart }: { onStart: (useWebcam: boolean
           <div className={'flex flex-row gap-12 justify-center gap-4 w-full m-6'}>
             <span className='flex flex-col items-center text-xs group'>
               <button
-                className='px-6 py-3 font-semibold text-base bg-gray-300 text-gray-600 rounded-lg'
+                className='px-6 py-3 font-semibold text-base bg-green-300 rounded-lg'
                 onClick={() => onStart(false)}>
                 🎮 Keyboard & Cursor
               </button>

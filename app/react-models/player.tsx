@@ -115,6 +115,7 @@ class Player {
     direction: THREE.Vector3 | null,
     distance: number | null,
     setCameraRotation: (rotation: { x: number; y: number }) => void,
+    keyStates?: Record<string, boolean>,
   ) {
     const speedMultiplier = distance !== null ? (distance - 0.05) / (0.15 - 0.05) : 1; // Normalize distance to a range of 0 to 1
     const targetSpeed =
@@ -123,23 +124,25 @@ class Player {
     // Calculate directional velocities based on input
     const movementVector = new THREE.Vector3();
 
-    if (distance) {
+    if (keyStates) {
+      // Keyboard mode: WASD
+      if (keyStates.KeyW) movementVector.add(this.getForwardVector());
+      if (keyStates.KeyS) movementVector.add(this.getForwardVector().clone().negate());
+      if (keyStates.KeyA) movementVector.add(this.getSideVector().clone().negate());
+      if (keyStates.KeyD) movementVector.add(this.getSideVector());
+    } else if (distance) {
+      // Webcam mode
       movementVector.add(this.getForwardVector());
     }
 
-    // Normalize the movement vector to ensure uniform speed and apply target speed
+    // Normalize the movement vector and apply speed
     if (movementVector.length() > 0) {
       movementVector.normalize().multiplyScalar(targetSpeed);
       this.playerVelocity.add(movementVector);
     }
 
-    // // Handle jumping separately
-    // if (this.playerOnFloor && keyStates['Space']) {
-    //   this.playerVelocity.y = JUMP_FORCE; // Allow jumping only when on the floor
-    // }
-
     // Use the direction from the hand to control the camera rotation
-    if (direction) {
+    if (!keyStates && direction) {
       const rotationY = Math.atan2(direction.x, direction.z);
       const rotationX = -Math.asin(direction.y);
       setCameraRotation({
@@ -168,9 +171,11 @@ class Player {
 export default function PlayerComponent({
   worldOctree,
   playerCollider,
+  controlMode,
 }: {
   worldOctree: Octree;
   playerCollider: React.RefObject<Capsule>;
+  controlMode: 'keyboard' | 'webcam';
 }) {
   const { camera } = useThree();
   // const playerColliderRef = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
@@ -179,6 +184,34 @@ export default function PlayerComponent({
   const clock = useRef(new THREE.Clock());
   const { direction } = useDirection();
   const { distance } = useDistance();
+
+  // for keyboard & mouse
+  const keyStates = useRef<Record<string, boolean>>({});
+  useEffect(() => {
+    if (controlMode === 'keyboard') {
+      const onKeyDown = (e: KeyboardEvent) => (keyStates.current[e.code] = true);
+      // keyStates((state) => ({ ...state, [event.code]: true }));
+      const onKeyUp = (e: KeyboardEvent) => (keyStates.current[e.code] = false);
+      // setKeyStates((state) => ({ ...state, [event.code]: false }));
+      const onMouseDown = () => document.body.requestPointerLock();
+      const onMouseMove = (e: MouseEvent) => {
+        camera.rotation.x -= e.movementY * 0.002;
+        camera.rotation.y -= e.movementX * 0.002;
+      };
+
+      document.addEventListener('keydown', onKeyDown);
+      document.addEventListener('keyup', onKeyUp);
+      document.addEventListener('mousedown', onMouseDown);
+      document.addEventListener('mousemove', onMouseMove);
+
+      return () => {
+        document.removeEventListener('keydown', onKeyDown);
+        document.removeEventListener('keyup', onKeyUp);
+        document.removeEventListener('mousedown', onMouseDown);
+        document.removeEventListener('mousemove', onMouseMove);
+      };
+    }
+  }, [camera, controlMode]);
 
   // Create spring values for camera rotation
   const springRotationX = useSpring(0, { stiffness: 10, damping: 40 });
@@ -189,20 +222,6 @@ export default function PlayerComponent({
     if (playerCollider.current) {
       player.current = new Player(camera, worldOctree, playerCollider.current);
       camera.rotation.order = 'YXZ';
-
-      // const onKeyDown = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: true }));
-      // const onKeyUp = (event: KeyboardEvent) => setKeyStates((state) => ({ ...state, [event.code]: false }));
-      // const onMouseDown = () => document.body.requestPointerLock();
-
-      // document.addEventListener("keydown", onKeyDown);
-      // document.addEventListener("keyup", onKeyUp);
-      // document.addEventListener("mousedown", onMouseDown);
-
-      // return () => {
-      //   document.removeEventListener("keydown", onKeyDown);
-      //   document.removeEventListener("keyup", onKeyUp);
-      //   document.removeEventListener("mousedown", onMouseDown);
-      // };
     }
   }, [camera, playerCollider, worldOctree]);
 
@@ -213,17 +232,24 @@ export default function PlayerComponent({
       if (player.current) {
         // Update player and handle movement each substep
         player.current.updatePlayer(deltaTime);
-        player.current.handleMovement(deltaTime, direction, distance, ({ x, y }) => {
-          springRotationX.set(x);
-          springRotationY.set(y);
-        });
-        // Here you could also call other update functions (e.g., updateSpheres, teleportPlayerIfOob, etc.)
+        player.current.handleMovement(
+          deltaTime,
+          controlMode === 'webcam' ? direction : null,
+          controlMode === 'webcam' ? distance : null,
+          ({ x, y }) => {
+            springRotationX.set(x);
+            springRotationY.set(y);
+          },
+          controlMode === 'keyboard' ? keyStates.current : undefined,
+        );
       }
     }
 
-    // Apply the spring rotation to the camera
-    camera.rotation.x = springRotationX.get();
-    camera.rotation.y = springRotationY.get();
+    // Webcam mode: Apply the spring rotation to the camera
+    if (controlMode === 'webcam') {
+      camera.rotation.x = springRotationX.get();
+      camera.rotation.y = springRotationY.get();
+    }
   });
 
   return null;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function SplashScreen({ onStart }: { onStart: () => void }) {
+export default function SplashScreen({ onStart }: { onStart: (useWebcam: boolean) => void }) {
   const [overlay, setOverlay] = useState(false);
 
   const toggleOverlay = () => {
@@ -35,13 +35,9 @@ export default function SplashScreen({ onStart }: { onStart: () => void }) {
             <span className='flex flex-col items-center text-xs group'>
               <button
                 className='px-6 py-3 font-semibold text-base bg-gray-300 text-gray-600 rounded-lg'
-                disabled
                 onClick={() => onStart(false)}>
                 🎮 Keyboard & Cursor
               </button>
-              <span className='absolute -bottom-4 opacity-0 group-hover:opacity-100'>
-                Still button doesn't work yet!
-              </span>
             </span>
             <button
               className='px-6 py-3 font-semibold text-base bg-green-300 rounded-lg'

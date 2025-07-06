@@ -7,19 +7,25 @@ import SplashScreen from './components/splash-screen';
 
 export default function Home() {
   const [started, setStarted] = useState(false);
+  const [useWebcam, setUseWebcam] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!started) {
-    return <SplashScreen onStart={() => setStarted(true)} />;
+    return (
+      <SplashScreen
+        onStart={(webcam) => {
+          setUseWebcam(webcam);
+          setStarted(true);
+        }}
+      />
+    );
   }
 
   return (
     <DirectionProvider>
       <DistanceProvider>
-        <>
-          <ThreeCanvas />
-          <VideoElement videoRef={videoRef} />
-        </>
+        <ThreeCanvas controlMode={useWebcam ? 'webcam' : 'keyboard'} />
+        {useWebcam && <VideoElement videoRef={videoRef} />}
       </DistanceProvider>
     </DirectionProvider>
   );

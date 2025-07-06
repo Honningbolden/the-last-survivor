@@ -22,7 +22,7 @@ import PlayerComponent from '../react-models/player';
 import ScatteredRocks from '../react-models/scattered-rocks';
 import LoadingScreen from './loading-screen';
 
-export default function ThreeCanvas() {
+export default function ThreeCanvas({ controlMode }: { controlMode: 'keyboard' | 'webcam' }) {
   const worldOctree = useRef<Octree>(new Octree());
   const playerCollider = useRef(
     new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35),
@@ -141,7 +141,11 @@ export default function ThreeCanvas() {
             <ScatteredRocks />
             {/* <TestRocks/> */}
             <BakeShadows />
-            <PlayerComponent worldOctree={worldOctree.current} playerCollider={playerCollider} />
+            <PlayerComponent
+              worldOctree={worldOctree.current}
+              playerCollider={playerCollider}
+              controlMode={controlMode}
+            />
             {triggerZonesConfig.map((config, index) => {
               // only show current (blue) and next (red) spheres
               if (index < currentIndex || index > currentIndex + 1) return null;

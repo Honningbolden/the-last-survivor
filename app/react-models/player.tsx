@@ -1,17 +1,16 @@
-
-import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
-import { Capsule, Octree } from "three-stdlib";
-import { useDirection, useDistance } from "../components/get-direction";
-import { useSpring, motion } from "framer-motion";
+import { useFrame, useThree } from '@react-three/fiber';
+import { useSpring } from 'framer-motion';
+import { useEffect, useRef } from 'react';
+import * as THREE from 'three';
+import { Capsule, Octree } from 'three-stdlib';
+import { useDirection, useDistance } from '../components/get-direction';
 
 // Hand recognition packages
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 import '@tensorflow/tfjs-core';
 // Register WebGL backend.
-import '@tensorflow/tfjs-backend-webgl';
 import '@mediapipe/hands';
+import '@tensorflow/tfjs-backend-webgl';
 
 // Utility Variables
 const STEPS_PER_FRAME = 5;
@@ -86,7 +85,8 @@ class Player {
       // If the player is not on the floor apply sliding mechanics
       if (!this.playerOnFloor) {
         // Calculate sliding force proportional to the steepness of the slope
-        const slidingForce = MAX_SLIDING_FORCE * (slopeAngle - MAX_SLOPE_ANGLE) / (90 - MAX_SLOPE_ANGLE);
+        const slidingForce =
+          (MAX_SLIDING_FORCE * (slopeAngle - MAX_SLOPE_ANGLE)) / (90 - MAX_SLOPE_ANGLE);
         // Limit sliding force to a reasonable value
         const effectiveSlidingForce = Math.min(slidingForce, MAX_SLIDING_FORCE);
 
@@ -110,10 +110,15 @@ class Player {
     }
   }
 
-  handleMovement(deltaTime: number, direction: THREE.Vector3 | null, distance: number | null, setCameraRotation: (rotation: { x: number, y: number }) => void
+  handleMovement(
+    deltaTime: number,
+    direction: THREE.Vector3 | null,
+    distance: number | null,
+    setCameraRotation: (rotation: { x: number; y: number }) => void,
   ) {
     const speedMultiplier = distance !== null ? (distance - 0.05) / (0.15 - 0.05) : 1; // Normalize distance to a range of 0 to 1
-    const targetSpeed = deltaTime * (this.playerOnFloor ? GROUND_SPEED : AIR_SPEED) * speedMultiplier;
+    const targetSpeed =
+      deltaTime * (this.playerOnFloor ? GROUND_SPEED : AIR_SPEED) * speedMultiplier;
 
     // Calculate directional velocities based on input
     const movementVector = new THREE.Vector3();
@@ -137,7 +142,10 @@ class Player {
     if (direction) {
       const rotationY = Math.atan2(direction.x, direction.z);
       const rotationX = -Math.asin(direction.y);
-      setCameraRotation({ x: this.camera.rotation.x + rotationX, y: this.camera.rotation.y + rotationY });
+      setCameraRotation({
+        x: this.camera.rotation.x + rotationX,
+        y: this.camera.rotation.y + rotationY,
+      });
     }
   }
 
@@ -157,7 +165,13 @@ class Player {
   }
 }
 
-export default function PlayerComponent({ worldOctree, playerCollider }: { worldOctree: Octree, playerCollider: React.RefObject<Capsule> }) {
+export default function PlayerComponent({
+  worldOctree,
+  playerCollider,
+}: {
+  worldOctree: Octree;
+  playerCollider: React.RefObject<Capsule>;
+}) {
   const { camera } = useThree();
   // const playerColliderRef = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
   // const [keyStates, setKeyStates] = useState({});

@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Last Survivor: An Interactive Storybook Experience
+A 2-week Storytelling course project at The Danish School of Media & Journalism (Coded Design, 3rd Semester).
 
-## Getting Started
+## Brief Creative Explanation
+**The Last Survivor** combines the immersive experiecen of storybooks and audio with the interactivity of video games.
+Move through a forgotten world, triggering narrative passages as you explore—where each choice brings you closer to your lost identity.
 
-First, run the development server:
+## Story
+You wake up in a dusty infirmary on a foreign planet, with no recollection of your identity. A rusty needledrop in your arm suggest you weren't meant to wake up again. An old helmet and a pair of boots are left with you. Stepping outside, the vacuum of the atmosphere tears away what little remians the room behind you.
+As you wander through the rocky landscape, you encounter relics of over-industrialization and, through the fog of amnesia, you slowly reveal fragments of your own origin story.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## How to Play
+[Demo hosted on Netlify](#)
+(Demo link coming soon)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The story unfolds in **audio passages**—represented as glowing spheres.
+- **Blue Sphere:** Ready to be played
+- **Red Sphere:** Next passage, but previous audio not finished
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Controls
+1) **Hands + Webcam**
+    * **Right index finger:** Control where you look
+    * **Left index finger & thumb:** Control movement speed
+        - Fingers touching = no movement
+        - Fingers apart = full speed
+2) **Keyboard & mMuse**
+    * **W-A-S-D:** Move
+    * **Mouse**: Look around
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### Tech Stack
+* TypeScript
+* React 18 / Next.js 13
+* react-three/fiber
+* react-three/drei
+* framer-motion-3D
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> *Project is still a work-in-progress.*

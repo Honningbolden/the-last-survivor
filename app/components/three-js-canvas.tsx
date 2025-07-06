@@ -54,9 +54,7 @@ export default function ThreeCanvas({ controlMode }: { controlMode: 'keyboard' |
   useEffect(() => {
     audioBuffers.current = triggerZonesConfig.map((cfg) => {
       const clip = new Audio(cfg.audioFile);
-      clip.muted = true;
       clip.preload = 'auto';
-      clip.play().catch(() => {});
       clip.onended = () => setCurrentIndex((i) => i + 1);
       return clip;
     });

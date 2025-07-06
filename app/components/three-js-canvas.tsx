@@ -1,6 +1,15 @@
 'use client';
 
-import { AccumulativeShadows, AdaptiveDpr, BakeShadows, ContactShadows, Environment, Preload, RandomizedLight, Stars } from '@react-three/drei';
+import {
+  AccumulativeShadows,
+  AdaptiveDpr,
+  BakeShadows,
+  ContactShadows,
+  Environment,
+  Preload,
+  RandomizedLight,
+  Stars,
+} from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -15,7 +24,9 @@ import LoadingScreen from './loading-screen';
 
 export default function ThreeCanvas() {
   const worldOctree = useRef<Octree>(new Octree());
-  const playerCollider = useRef(new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35));
+  const playerCollider = useRef(
+    new Capsule(new THREE.Vector3(0, 0.35, 0), new THREE.Vector3(0, 1, 0), 0.35),
+  );
   const audioBuffers = useRef<HTMLAudioElement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0); // track which audio is next
 
@@ -69,7 +80,14 @@ export default function ThreeCanvas() {
         camera={{ fov: 50, near: 0.1, far: 500, position: [0, 2, 5] }}>
         <AdaptiveDpr pixelated />
 
-        <Environment background near={100} far={10000} resolution={1024} frames={Infinity} environmentIntensity={0} backgroundIntensity={0.3}>
+        <Environment
+          background
+          near={100}
+          far={10000}
+          resolution={1024}
+          frames={Infinity}
+          environmentIntensity={0}
+          backgroundIntensity={0.3}>
           <Stars radius={80} depth={100} count={8000} factor={4} saturation={0.5} fade speed={1} />
         </Environment>
 
@@ -86,7 +104,15 @@ export default function ThreeCanvas() {
           />
         </AccumulativeShadows>
 
-        <ContactShadows position={[0, -0.5, 0]} width={10} height={10} resolution={256} blur={2} far={1} opacity={0.5} />
+        <ContactShadows
+          position={[0, -0.5, 0]}
+          width={10}
+          height={10}
+          resolution={256}
+          blur={2}
+          far={1}
+          opacity={0.5}
+        />
 
         {/* Lighting */}
         <hemisphereLight castShadow color={0x397eed} groundColor={0xf5c04e} intensity={0.3} />
@@ -150,50 +176,63 @@ export default function ThreeCanvas() {
   );
 }
 
-const triggerZonesConfig: { position: [number, number, number]; radius: number; audioFile: string }[] = [
+const triggerZonesConfig: {
+  position: [number, number, number];
+  radius: number;
+  audioFile: string;
+}[] = [
   {
     position: [0, 1.3, 0.5],
     radius: 1,
-    audioFile: '/Voiceover/Jordan/Inside Infirmary (pt1)/ElevenLabs_2024-10-09T11_47_43_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Inside Infirmary (pt1)/ElevenLabs_2024-10-09T11_47_43_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
     position: [-3, 2, -16],
     radius: 8,
-    audioFile: '/Voiceover/Jordan/Outside infirmary (pt2)/ElevenLabs_2024-10-09T11_50_51_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Outside infirmary (pt2)/ElevenLabs_2024-10-09T11_50_51_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
     position: [-10, 4, -30],
     radius: 6,
-    audioFile: '/Voiceover/Jordan/Toolbox (pt3)/ElevenLabs_2024-10-09T11_54_07_Jordan - Warm Narrator_pvc_s50_sb50_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Toolbox (pt3)/ElevenLabs_2024-10-09T11_54_07_Jordan - Warm Narrator_pvc_s50_sb50_se0_b_m2.mp3',
   },
   {
     position: [-26, 4.6, -44],
     radius: 10,
-    audioFile: '/Voiceover/Jordan/Mining tracks (pt4)/ElevenLabs_2024-10-09T11_55_21_Jordan - Warm Narrator_pvc_s35_sb40_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Mining tracks (pt4)/ElevenLabs_2024-10-09T11_55_21_Jordan - Warm Narrator_pvc_s35_sb40_se0_b_m2.mp3',
   },
   {
     position: [-40, 9, -89],
     radius: 16,
-    audioFile: '/Voiceover/Jordan/Three Skeletons (pt5)/ElevenLabs_2024-10-09T11_56_32_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Three Skeletons (pt5)/ElevenLabs_2024-10-09T11_56_32_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
     position: [-19, 108, -9],
     radius: 12,
-    audioFile: '/Voiceover/Jordan/Industrial Parking (pt6)/ElevenLabs_2024-10-09T12_03_38_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Industrial Parking (pt6)/ElevenLabs_2024-10-09T12_03_38_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
     position: [40, 8, -55],
     radius: 32,
-    audioFile: '/Voiceover/Jordan/Bloody skeleton (pt7)/ElevenLabs_2024-10-09T12_00_00_Jordan - Warm Narrator_pvc_s50_sb70_se10_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Bloody skeleton (pt7)/ElevenLabs_2024-10-09T12_00_00_Jordan - Warm Narrator_pvc_s50_sb70_se10_b_m2.mp3',
   },
   {
     position: [60, 18, -95],
     radius: 32,
-    audioFile: '/Voiceover/Jordan/City View (pt8)/ElevenLabs_2024-10-10T10_20_24_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/City View (pt8)/ElevenLabs_2024-10-10T10_20_24_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
     position: [77, 23, -130],
     radius: 32,
-    audioFile: '/Voiceover/Jordan/Revelation (pt9)/ElevenLabs_2024-10-09T12_02_12_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
+    audioFile:
+      '/Voiceover/Jordan/Revelation (pt9)/ElevenLabs_2024-10-09T12_02_12_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
 ];

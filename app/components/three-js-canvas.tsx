@@ -190,50 +190,50 @@ const triggerZonesConfig: {
       '/Voiceover/Jordan/Inside Infirmary (pt1)/ElevenLabs_2024-10-09T11_47_43_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
-    position: [-3, 2, -16],
-    radius: 8,
+    position: [-3, 3, -16],
+    radius: 1,
     audioFile:
       '/Voiceover/Jordan/Outside infirmary (pt2)/ElevenLabs_2024-10-09T11_50_51_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
     position: [-10, 4, -30],
-    radius: 6,
+    radius: 1,
     audioFile:
       '/Voiceover/Jordan/Toolbox (pt3)/ElevenLabs_2024-10-09T11_54_07_Jordan - Warm Narrator_pvc_s50_sb50_se0_b_m2.mp3',
   },
   {
-    position: [-26, 4.6, -44],
-    radius: 10,
+    position: [-26, 5, -44],
+    radius: 1,
     audioFile:
       '/Voiceover/Jordan/Mining tracks (pt4)/ElevenLabs_2024-10-09T11_55_21_Jordan - Warm Narrator_pvc_s35_sb40_se0_b_m2.mp3',
   },
   {
-    position: [-40, 9, -89],
-    radius: 16,
+    position: [-40, 8, -89],
+    radius: 1,
     audioFile:
       '/Voiceover/Jordan/Three Skeletons (pt5)/ElevenLabs_2024-10-09T11_56_32_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
-    position: [-19, 108, -9],
-    radius: 12,
+    position: [-3, 8, -110],
+    radius: 2,
     audioFile:
       '/Voiceover/Jordan/Industrial Parking (pt6)/ElevenLabs_2024-10-09T12_03_38_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
-    position: [40, 8, -55],
-    radius: 32,
+    position: [30, 5, -60],
+    radius: 1,
     audioFile:
       '/Voiceover/Jordan/Bloody skeleton (pt7)/ElevenLabs_2024-10-09T12_00_00_Jordan - Warm Narrator_pvc_s50_sb70_se10_b_m2.mp3',
   },
   {
-    position: [60, 18, -95],
-    radius: 32,
+    position: [70, 13.5, -85],
+    radius: 1,
     audioFile:
       '/Voiceover/Jordan/City View (pt8)/ElevenLabs_2024-10-10T10_20_24_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
   {
-    position: [77, 23, -130],
-    radius: 32,
+    position: [77, 24, -130],
+    radius: 1,
     audioFile:
       '/Voiceover/Jordan/Revelation (pt9)/ElevenLabs_2024-10-09T12_02_12_Jordan - Warm Narrator_pvc_s50_sb75_se0_b_m2.mp3',
   },
